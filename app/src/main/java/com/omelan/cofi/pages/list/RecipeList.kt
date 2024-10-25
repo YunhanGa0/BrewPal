@@ -36,9 +36,16 @@ import com.omelan.cofi.share.pages.Destinations
 import com.omelan.cofi.ui.Spacing
 import com.omelan.cofi.utils.FabType
 import com.omelan.cofi.utils.getDefaultPadding
+import android.content.Context
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationCompat
 
 fun NavGraphBuilder.recipeList(navController: NavController) {
     composable(Destinations.RECIPE_LIST) {
+        val context = LocalContext.current
         RecipeList(
             navigateToRecipe = { recipeId ->
                 navController.navigate(
@@ -49,6 +56,22 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
             },
             addNewRecipe = { navController.navigate(route = Destinations.RECIPE_ADD) },
             goToSettings = { navController.navigate(route = Destinations.SETTINGS) },
+            onNewButtonClick = {
+                // 发送通知
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val channelId = "test_channel"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val channel = NotificationChannel(channelId, "Test Notifications", NotificationManager.IMPORTANCE_DEFAULT)
+                    notificationManager.createNotificationChannel(channel)
+                }
+                val builder = NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.ic_github_icon)
+                    .setContentTitle("新功能测试")
+                    .setContentText("您点击了新添加的按钮！")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(true)
+                notificationManager.notify(1, builder.build())
+            }
         )
     }
 }
@@ -59,8 +82,10 @@ fun RecipeList(
     navigateToRecipe: (recipeId: Int) -> Unit,
     addNewRecipe: () -> Unit,
     goToSettings: () -> Unit,
+    onNewButtonClick: () -> Unit,
     recipeViewModel: RecipeViewModel = viewModel(),
     stepsViewModel: StepsViewModel = viewModel(),
+    context: Context = LocalContext.current
 ) {
     val configuration = LocalConfiguration.current
     val recipes by recipeViewModel.getAllRecipes().observeAsState(initial = emptyList())
@@ -81,6 +106,9 @@ fun RecipeList(
         topBar = {
             PiPAwareAppBar(
                 actions = {
+                    IconButton(onClick = onNewButtonClick) {
+                        Icon(Icons.Rounded.Add, contentDescription = "Add new item")
+                    }
                     IconButton(onClick = goToSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = null)
                     }
@@ -135,5 +163,6 @@ fun RecipeListPreview() {
         navigateToRecipe = {},
         addNewRecipe = {},
         goToSettings = {},
+        onNewButtonClick = {}
     )
 }

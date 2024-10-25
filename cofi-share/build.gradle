@@ -15,7 +15,17 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        /*javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = mapOf(
+                                "room.schemaLocation" to "projectDir/schemas"
+                )
+            }
+        }
+
+         */
     }
+
 
     buildTypes {
         release {
@@ -36,6 +46,7 @@ android {
     }
     buildFeatures { // Enables Jetpack Compose for this module
         compose = true
+        //viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
@@ -44,7 +55,9 @@ android {
 
 ksp {
     arg(new RoomSchemaArgProvider(new File(projectDir, "schemas")))
+    //arg("room.schemaLocation", "$projectDir/schemas")
 }
+
 
 class RoomSchemaArgProvider implements CommandLineArgumentProvider {
 

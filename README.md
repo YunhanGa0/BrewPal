@@ -66,7 +66,7 @@
 
 # Contribute
 
-- [Translation](docs/Contribute/Language.md)
+- [_Translation_](docs/Contribute/Language.md)
 - [New default recipe](docs/Contribute/Recipe.md)
 - [New feature](docs/Contribute/CONTRIBUTING.md#featuresimprovements)
 - [Bugfix](docs/Contribute/CONTRIBUTING.md#bugfixes)
