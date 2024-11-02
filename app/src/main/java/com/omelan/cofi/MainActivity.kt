@@ -1,5 +1,6 @@
 package com.omelan.cofi
 
+import RecipeTimesPage
 import android.app.PictureInPictureParams
 import android.content.res.Configuration
 import android.os.Build
@@ -22,6 +23,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kieronquinn.monetcompat.BuildConfig
@@ -141,6 +143,11 @@ class MainActivity : MonetCompatActivity() {
                     recipeDetails(navController, onTimerRunning, windowSizeClass, db)
                     recipeEdit(navController, db)
                     addRecipe(navController, db)
+                    composable(Destinations.RECIPE_TIMES) {
+                        RecipeTimesPage(
+                            goBack = { navController.popBackStack() }
+                        )
+                    }
                     settings(navController)
                 }
             }

@@ -109,7 +109,7 @@ fun NavGraphBuilder.recipeEdit(
         val recipeViewModel: RecipeViewModel = viewModel()
         val stepsViewModel: StepsViewModel = viewModel()
         val recipe by recipeViewModel.getRecipe(recipeId)
-            .observeAsState(Recipe(name = "", description = ""))
+            .observeAsState(Recipe(name = "", description = "", times = 0))
         val steps by stepsViewModel.getAllStepsForRecipe(recipeId)
             .observeAsState(listOf())
         RecipeEdit(
@@ -169,7 +169,7 @@ fun RecipeEdit(
     saveRecipe: (Recipe, List<Step>) -> Unit,
     goBack: () -> Unit = {},
     stepsToEdit: List<Step> = listOf(),
-    recipeToEdit: Recipe = Recipe(name = "", description = "", recipeIcon = RecipeIcon.Grinder),
+    recipeToEdit: Recipe = Recipe(name = "", description = "", recipeIcon = RecipeIcon.Grinder, times = 0),
     deleteRecipe: () -> Unit = {},
     cloneRecipe: (Recipe, List<Step>) -> Unit = { _, _ -> },
     isEditing: Boolean = false,

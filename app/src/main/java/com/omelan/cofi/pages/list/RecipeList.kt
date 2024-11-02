@@ -42,6 +42,7 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
+import androidx.compose.ui.res.painterResource
 
 fun NavGraphBuilder.recipeList(navController: NavController) {
     composable(Destinations.RECIPE_LIST) {
@@ -56,6 +57,7 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
             },
             addNewRecipe = { navController.navigate(route = Destinations.RECIPE_ADD) },
             goToSettings = { navController.navigate(route = Destinations.SETTINGS) },
+            goToTimes = { navController.navigate(route = Destinations.RECIPE_TIMES) },
             onNewButtonClick = {
                 // 发送通知
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -83,6 +85,7 @@ fun RecipeList(
     addNewRecipe: () -> Unit,
     goToSettings: () -> Unit,
     onNewButtonClick: () -> Unit,
+    goToTimes: () -> Unit,
     recipeViewModel: RecipeViewModel = viewModel(),
     stepsViewModel: StepsViewModel = viewModel(),
     context: Context = LocalContext.current
@@ -108,6 +111,12 @@ fun RecipeList(
                 actions = {
                     IconButton(onClick = onNewButtonClick) {
                         Icon(Icons.Rounded.Add, contentDescription = "Add new item")
+                    }
+                    IconButton(onClick = goToTimes) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_history),
+                            contentDescription = "使用统计"
+                        )
                     }
                     IconButton(onClick = goToSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = null)
@@ -163,6 +172,7 @@ fun RecipeListPreview() {
         navigateToRecipe = {},
         addNewRecipe = {},
         goToSettings = {},
-        onNewButtonClick = {}
+        onNewButtonClick = {},
+        goToTimes = {}
     )
 }

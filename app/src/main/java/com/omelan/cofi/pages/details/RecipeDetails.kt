@@ -108,6 +108,8 @@ fun NavGraphBuilder.recipeDetails(
                         hasDoneThisRecipeMoreThanOnce = true
                     }
                     db.recipeDao().updateRecipe(recipe.copy(lastFinished = Date().time))
+                    val t = recipe.times + 1
+                    db.recipeDao().updateRecipe(recipe.copy(times = t))
                 }
                 if (InstantUtils.isInstantApp(context) && !isInPiP) {
                     InstantUtils.showInstallPrompt(context as Activity)
@@ -164,7 +166,7 @@ fun RecipeDetails(
 ) {
     val steps by stepsViewModel.getAllStepsForRecipe(recipeId).observeAsState(listOf())
     val recipe by recipeViewModel.getRecipe(recipeId)
-        .observeAsState(Recipe(name = "", description = ""))
+        .observeAsState(Recipe(name = "", description = "", times = 0))
     RecipeDetails(
         recipe,
         steps,

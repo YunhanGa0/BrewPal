@@ -83,7 +83,7 @@ fun LazyGridItemScope.RecipeItem(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = recipe.name,
+                    text = recipe.name + "\t*" + recipe.times,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.SemiBold,
@@ -114,6 +114,7 @@ fun PreviewRecipeItem() {
                     id = 0,
                     name = "Ultimate V60",
                     description = "Recipe by Hoffman",
+                    times = 10
                 ),
                 allSteps = listOf(
                     Step(

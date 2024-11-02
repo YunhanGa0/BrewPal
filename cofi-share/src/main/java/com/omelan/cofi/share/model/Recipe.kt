@@ -86,6 +86,7 @@ private const val jsonId = "id"
 private const val jsonDescription = "description"
 private const val jsonRecipeIcon = "recipeIcon"
 private const val jsonLastFinished = "lastFinished"
+private const val jsonTimes= "times"
 const val jsonSteps = "steps"
 
 @Entity
@@ -94,6 +95,7 @@ data class Recipe(
     val name: String,
     val description: String = "",
     @ColumnInfo(name = "last_finished") val lastFinished: Long = 0L,
+    @ColumnInfo(name = "times",defaultValue = "0") val times: Int,
     @ColumnInfo(name = "icon") val recipeIcon: RecipeIcon = RecipeIcon.Grinder,
 ) : SharedData {
     override fun serialize(): JSONObject = serialize(null, true)
@@ -118,6 +120,7 @@ fun JSONObject.toRecipe(withId: Boolean = false) = if (withId) {
         name = getString(jsonName),
         description = getString(jsonDescription),
         lastFinished = optLong(jsonLastFinished, 0L),
+        times = getInt(jsonTimes),
         recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
     )
 } else {
@@ -125,6 +128,7 @@ fun JSONObject.toRecipe(withId: Boolean = false) = if (withId) {
         name = getString(jsonName),
         description = getString(jsonDescription),
         lastFinished = optLong(jsonLastFinished, 0L),
+        times = getInt(jsonTimes),
         recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
     )
 }

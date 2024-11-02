@@ -17,13 +17,14 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                     "name TEXT NOT NULL," +
                     "description TEXT NOT NULL," +
                     "last_finished INTEGER NOT NULL," +
+                    "times INTEGER NOT NULL,"+
                     "icon TEXT NOT NULL," +
                     "PRIMARY KEY(id))",
         )
         // Copy the data
         database.execSQL(
-            "INSERT INTO recipe_new (id, name, description, last_finished) " +
-                    "SELECT id, name, description, last_finished " +
+            "INSERT INTO recipe_new (id, name, description, last_finished, times) " +
+                    "SELECT id, name, description, last_finished, times " +
                     "FROM recipe",
         )
         // Remove the old table
@@ -39,10 +40,16 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE Recipe ADD COLUMN times INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_5_6)
 
 @Database(
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
@@ -79,6 +86,7 @@ abstract class AppDatabase : RoomDatabase() {
                                             put("name", it.name)
                                             put("description", it.description)
                                             put("last_finished", it.lastFinished)
+                                            put("times", it.times)
                                             put("icon", it.recipeIcon.name)
                                         }
                                         db.insert(

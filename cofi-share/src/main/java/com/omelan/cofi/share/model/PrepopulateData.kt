@@ -38,36 +38,42 @@ class PrepopulateData(context: Context) {
             name = resources.getString(R.string.prepopulate_v60_name),
             description = resources.getString(R.string.prepopulate_v60_description),
             recipeIcon = RecipeIcon.V60,
+            times = 10,
         ),
         Recipe(
             id = v601CupId,
             name = resources.getString(R.string.prepopulate_v60_1cup_name),
             description = resources.getString(R.string.prepopulate_v60_1cup_description),
             recipeIcon = RecipeIcon.V60,
+            times = 20,
         ),
         Recipe(
             id = frenchPressId,
             name = resources.getString(R.string.prepopulate_frenchPress_name),
             description = resources.getString(R.string.prepopulate_frenchPress_description),
             recipeIcon = RecipeIcon.FrenchPress,
+            times = 20,
         ),
         Recipe(
             id = chemexId,
             name = resources.getString(R.string.prepopulate_chemex_name),
             description = resources.getString(R.string.prepopulate_chemex_description),
             recipeIcon = RecipeIcon.Chemex,
+            times = 30,
         ),
         Recipe(
             id = aeroPress,
             name = resources.getString(R.string.prepopulate_aero_name),
             description = resources.getString(R.string.prepopulate_aero_description),
             recipeIcon = RecipeIcon.AeroPress,
+            times = 40,
         ),
         Recipe(
             id = cleverDripperId,
             name = resources.getString(R.string.prepopulate_clever_dripper_name),
             description = resources.getString(R.string.prepopulate_clever_dripper_description),
             recipeIcon = RecipeIcon.V60,
+            times = 50,
         ),
     )
     val steps = listOf(
