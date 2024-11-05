@@ -145,6 +145,7 @@ class MainActivity : MonetCompatActivity() {
                     addRecipe(navController, db)
                     composable(Destinations.RECIPE_TIMES) {
                         RecipeTimesPage(
+                            navigateToRecipe = { recipeId -> navController.navigate("recipe/$recipeId") },
                             goBack = { navController.popBackStack() }
                         )
                     }
@@ -153,6 +154,7 @@ class MainActivity : MonetCompatActivity() {
             }
         }
     }
+
 
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,

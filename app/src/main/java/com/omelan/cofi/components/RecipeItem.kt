@@ -83,7 +83,8 @@ fun LazyGridItemScope.RecipeItem(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = recipe.name + "\t*" + recipe.times,
+                    //text = recipe.name + "\t*" + recipe.times,
+                    text = recipe.name,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.SemiBold,
