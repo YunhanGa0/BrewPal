@@ -138,6 +138,7 @@ configurations {
 
 dependencies {
     implementation project(path: ':cofi-share')
+    implementation 'androidx.compose.ui:ui-graphics-android:1.6.8'
     ktlint("com.pinterest:ktlint:0.48.2") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))

@@ -1,3 +1,4 @@
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,10 +10,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.omelan.cofi.share.model.RecipeViewModel
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,11 +25,14 @@ fun RecipeTimesPage(
 ) {
     val recipes by recipeViewModel.getAllRecipes().observeAsState(initial = emptyList())
     val sortedRecipes = recipes.sortedByDescending { it.times }
-    
+
+    // 生成颜色列表
+    val colors = sortedRecipes.map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("配方使用统计") },
+                title = { Text("Brew History") },
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
@@ -79,6 +85,49 @@ fun RecipeTimesPage(
                     }
                 }
             }
+
+            // 使用 Row 来并排显示 PieChart 和图例
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // PieChart
+                    PieChart(
+                        data = sortedRecipes.map { it.name to it.times },
+                        colors = colors,
+                        modifier = Modifier.size(200.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp)) // 添加间距
+
+                    // 图例
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        sortedRecipes.forEachIndexed { index, recipe ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(colors[index])
+                                )
+                                Text(
+                                    text = recipe.name,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-} 
+}
