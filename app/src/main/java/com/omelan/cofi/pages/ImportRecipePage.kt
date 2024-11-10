@@ -90,7 +90,7 @@ fun ImportRecipePage(
                             scope.launch {
                                 try {
                                     val (recipe, steps) = shareUtils.decodeRecipe(value)
-                                    val recipeId = viewModel.insertRecipe(recipe.copy(id = 0))
+                                    val recipeId = viewModel.insertRecipe(recipe.copy(id = 0, times = 0))
                                     val stepsWithRecipeId = steps.map { step ->
                                         step.copy(
                                             recipeId = recipeId.toInt(),
@@ -105,6 +105,7 @@ fun ImportRecipePage(
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     onImportComplete()
+                                    showScanner = false
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                     Toast.makeText(
@@ -189,7 +190,7 @@ fun ImportRecipePage(
                         scope.launch {
                             try {
                                 val (recipe, steps) = shareUtils.decodeRecipe(importText)
-                                val recipeId = viewModel.insertRecipe(recipe.copy(id = 0))
+                                val recipeId = viewModel.insertRecipe(recipe.copy(id = 0, times = 0))
                                 val stepsWithRecipeId = steps.map { step ->
                                     step.copy(
                                         recipeId = recipeId.toInt(),
@@ -204,6 +205,7 @@ fun ImportRecipePage(
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 onImportComplete()
+                                showScanner = false
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 showError = true
@@ -257,7 +259,7 @@ fun ImportRecipePage(
                     scope.launch {
                         try {
                             val (recipe, steps) = shareUtils.decodeRecipe(result)
-                            val recipeId = viewModel.insertRecipe(recipe.copy(id = 0))
+                            val recipeId = viewModel.insertRecipe(recipe.copy(id = 0, times = 0))
                             val stepsWithRecipeId = steps.map { step ->
                                 step.copy(
                                     recipeId = recipeId.toInt(),
