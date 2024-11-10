@@ -40,8 +40,8 @@ class AppDatabaseTest {
 
     @Test
     fun testAutoNumeration() {
-        val recipe = Recipe(name = "Test recipe1", description = "")
-        val recipe2 = Recipe(name = "Test recipe2", description = "")
+        val recipe = Recipe(name = "Test recipe1", description = "", times = 1)
+        val recipe2 = Recipe(name = "Test recipe2", description = "", times = 1)
         runBlocking {
             recipeDao.insertAll(recipe, recipe2)
         }
@@ -51,8 +51,8 @@ class AppDatabaseTest {
 
     @Test
     fun testGettingStepsForRecipe() {
-        val recipe = Recipe(name = "Test recipe1", description = "")
-        val recipe2 = Recipe(name = "Test recipe2", description = "")
+        val recipe = Recipe(name = "Test recipe1", description = "", times = 1)
+        val recipe2 = Recipe(name = "Test recipe2", description = "", times = 1)
         runBlocking {
             recipeDao.insertAll(recipe, recipe2)
         }

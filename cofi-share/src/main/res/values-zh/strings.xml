@@ -154,4 +154,18 @@ Source: https://youtu.be/AI4ynXzkSQo
     <string name="settings_background_timer_item">允许后台计时器</string>
     <string name="button_no">否</string>
     <string name="settings_translate_item">帮助翻译 Cofi</string>
+    <string name="import_recipe_title">导入配方</string>
+    <string name="import_recipe_text_hint">在此粘贴配方分享码</string>
+    <string name="import_recipe_scan">扫描二维码</string>
+    <string name="import_recipe_success">配方导入成功</string>
+    <string name="import_recipe_error">无效的配方数据</string>
+    <string name="import_recipe_paste">粘贴</string>
+    <string name="import_recipe_clear">清除</string>
+    <string name="camera_permission_required">需要相机权限</string>
+    <string name="save">保存</string>
+    <string name="qr_code_saved">二维码已保存到相册</string>
+    <string name="qr_code_save_failed">保存二维码失败</string>
+    <string name="import_recipe_pick_image">从图库选择</string>
+    <string name="qr_code_scan_failed">二维码识别失败</string>
+    <string name="qr_code_not_found">未在图片中找到二维码</string>
 </resources>

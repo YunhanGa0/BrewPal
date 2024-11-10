@@ -58,6 +58,7 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
             addNewRecipe = { navController.navigate(route = Destinations.RECIPE_ADD) },
             goToSettings = { navController.navigate(route = Destinations.SETTINGS) },
             goToTimes = { navController.navigate(route = Destinations.RECIPE_TIMES) },
+            goToImport ={ navController.navigate(route = Destinations.RECIPE_IMPORT) } ,
             onNewButtonClick = {
                 // 发送通知
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -86,6 +87,7 @@ fun RecipeList(
     goToSettings: () -> Unit,
     onNewButtonClick: () -> Unit,
     goToTimes: () -> Unit,
+    goToImport: () -> Unit,
     recipeViewModel: RecipeViewModel = viewModel(),
     stepsViewModel: StepsViewModel = viewModel(),
     context: Context = LocalContext.current
@@ -109,6 +111,12 @@ fun RecipeList(
         topBar = {
             PiPAwareAppBar(
                 actions = {
+                    IconButton(onClick = goToImport) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_import),
+                            contentDescription = null
+                        )
+                    }
                     IconButton(onClick = onNewButtonClick) {
                         Icon(Icons.Rounded.Add, contentDescription = "Add new item")
                     }
@@ -173,6 +181,7 @@ fun RecipeListPreview() {
         addNewRecipe = {},
         goToSettings = {},
         onNewButtonClick = {},
-        goToTimes = {}
+        goToTimes = {},
+        goToImport = {}
     )
 }

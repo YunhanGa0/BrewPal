@@ -167,28 +167,31 @@ fun RestoreListItem(afterRestore: (numberOfRestored: Int) -> Unit) {
     val db = AppDatabase.getInstance(context)
     val coroutineScope = rememberCoroutineScope()
 
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-            if (it == null) {
-                return@rememberLauncherForActivityResult
-            }
-            val contentResolver = context.contentResolver
-            contentResolver.openInputStream(it).use { inputStream ->
-                if (inputStream == null) return@rememberLauncherForActivityResult
-                val jsonString = String(inputStream.readBytes(), StandardCharsets.UTF_8)
-                val jsonArray = JSONArray(jsonString)
-                coroutineScope.launch {
-                    for (i in 0 until jsonArray.length()) {
-                        val jsonObject = jsonArray.getJSONObject(i)
-                        val recipe = jsonObject.toRecipe()
-                        val recipeId = db.recipeDao().insertRecipe(recipe)
-                        val steps = jsonObject.getJSONArray(jsonSteps).toSteps(recipeId = recipeId)
-                        db.stepDao().insertAll(steps)
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val contentResolver = context.contentResolver
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            val jsonString = String(inputStream.readBytes(), StandardCharsets.UTF_8)
+            val jsonArray = JSONArray(jsonString)
+            coroutineScope.launch {
+                for (i in 0 until jsonArray.length()) {
+                    val (recipe, steps) = jsonArray.getJSONObject(i).toRecipe(withId = false)
+                    val recipeId = db.recipeDao().insertRecipe(recipe)
+                    val stepsWithRecipeId = steps.map { step ->
+                        step.copy(
+                            recipeId = recipeId.toInt(),
+                            id = 0,
+                            orderInRecipe = steps.indexOf(step)
+                        )
                     }
+                    db.stepDao().insertAll(stepsWithRecipeId)
                 }
                 afterRestore(jsonArray.length())
             }
         }
+    }
 
     ListItem(
         headlineContent = { Text(text = stringResource(id = R.string.settings_restore)) },
@@ -220,19 +223,16 @@ fun BackupDialog(dismiss: () -> Unit, afterBackup: (numberOfBackups: Int) -> Uni
         return
     }
     val stepsWithRecipeId = steps.groupBy { it.recipeId }
-    val launcher = rememberLauncherForActivityResult(CreateDocument("application/json")) {
-        if (it == null) {
-            return@rememberLauncherForActivityResult
-        }
+    val launcher = rememberLauncherForActivityResult(CreateDocument("application/json")) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
         val contentResolver = context.contentResolver
-        contentResolver.openOutputStream(it).use { outputStream ->
-            if (outputStream == null) return@rememberLauncherForActivityResult
+        contentResolver.openOutputStream(uri)?.use { outputStream ->
             val jsonArray = JSONArray()
             recipesToBackup.forEach { recipe ->
-                jsonArray.put(recipe.serialize(stepsWithRecipeId[recipe.id]))
+                val recipeSteps = stepsWithRecipeId[recipe.id] ?: listOf()
+                jsonArray.put(recipe.serialize(recipeSteps))
             }
             outputStream.write(jsonArray.toString(2).toByteArray())
-            outputStream.close()
         }
         afterBackup(recipesToBackup.size)
         dismiss()

@@ -7,6 +7,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.omelan.cofi.share.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -79,6 +81,18 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun getRecipe(id: Int) = dao.get(id)
 
     fun getAllRecipes() = dao.getAll()
+
+    suspend fun insertRecipe(recipe: Recipe): Long{
+        return withContext(Dispatchers.IO) {
+            dao.insertRecipe(recipe)
+        }
+    }
+
+    suspend fun insertSteps(steps: List<Step>) {
+        withContext(Dispatchers.IO) {
+            db.stepDao().insertAll(steps)
+        }
+    }
 }
 
 private const val jsonName = "name"
@@ -105,38 +119,63 @@ data class Recipe(
             put(jsonName, name)
             put(jsonDescription, description)
             put(jsonRecipeIcon, recipeIcon.name)
-            put(jsonRecipeIcon, recipeIcon.name)
+            put(jsonTimes, times)
             if (withLastFinished) {
                 put(jsonLastFinished, lastFinished)
             }
-            put(jsonSteps, steps?.serialize())
+            if (steps != null) {
+                put(jsonSteps, steps.serialize())
+            }
+            this
         }
 }
 
 
-fun JSONObject.toRecipe(withId: Boolean = false) = if (withId) {
-    Recipe(
-        id = getInt(jsonId),
-        name = getString(jsonName),
-        description = getString(jsonDescription),
-        lastFinished = optLong(jsonLastFinished, 0L),
-        times = getInt(jsonTimes),
-        recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
-    )
-} else {
-    Recipe(
-        name = getString(jsonName),
-        description = getString(jsonDescription),
-        lastFinished = optLong(jsonLastFinished, 0L),
-        times = getInt(jsonTimes),
-        recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
-    )
+fun JSONObject.toRecipe(withId: Boolean = false): Pair<Recipe, List<Step>> {
+    val recipe = if (withId) {
+        Recipe(
+            id = getInt(jsonId),
+            name = getString(jsonName),
+            description = getString(jsonDescription),
+            lastFinished = optLong(jsonLastFinished, 0L),
+            times = optInt("times", 0),
+            recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
+        )
+    } else {
+        Recipe(
+            name = getString(jsonName),
+            description = getString(jsonDescription),
+            lastFinished = optLong(jsonLastFinished, 0L),
+            times = optInt("times", 0),
+            recipeIcon = RecipeIconTypeConverter().stringToRecipeIcon(getString(jsonRecipeIcon)),
+        )
+    }
+
+    // 获取步骤信息
+    val stepsArray = optJSONArray("steps")
+    val steps = mutableListOf<Step>()
+    if (stepsArray != null) {
+        for (i in 0 until stepsArray.length()) {
+            val stepJson = stepsArray.getJSONObject(i)
+            steps.add(Step(
+                name = stepJson.getString("name"),
+                time = stepJson.getIntOrNull("time"),
+                type = StepTypeConverter().stringToStepType(stepJson.getString("type")),
+                value = stepJson.getFloatOrNull("value"),
+                recipeId = recipe.id,
+                orderInRecipe = i,
+                id = 0
+            ))
+        }
+    }
+    
+    return Pair(recipe, steps)
 }
 
-fun JSONArray.toRecipes(withId: Boolean = false): List<Recipe> {
-    var recipies = listOf<Recipe>()
+fun JSONArray.toRecipes(withId: Boolean = false): List<Pair<Recipe, List<Step>>> {
+    var recipes = listOf<Pair<Recipe, List<Step>>>()
     for (i in 0 until length()) {
-        recipies = recipies.plus(getJSONObject(i).toRecipe(withId))
+        recipes = recipes.plus(getJSONObject(i).toRecipe(withId))
     }
-    return recipies
+    return recipes
 }

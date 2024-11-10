@@ -6,6 +6,7 @@
 
 package com.omelan.cofi.pages.details
 
+import ShareRecipeDialog
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -214,6 +215,8 @@ fun RecipeDetails(
     var showNotificationDialog by remember {
         mutableStateOf(!context.hasNotificationPermission() && isBackgroundTimerEnabled == null)
     }
+
+    var showShareDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(isBackgroundTimerEnabled) {
         showNotificationDialog =
@@ -428,9 +431,9 @@ fun RecipeDetails(
                             contentDescription = null,
                         )
                     }
-                    IconButton(onClick = { showAutomateLinkDialog = true }) {
+                    IconButton(onClick = { showShareDialog = true }) {
                         Icon(
-                            painterResource(id = R.drawable.ic_link),
+                            painterResource(id = R.drawable.ic_share),
                             contentDescription = null,
                         )
                     }
@@ -494,6 +497,12 @@ fun RecipeDetails(
         } else {
             TabletLayout(it, renderDescription, renderTimer, renderUpNext, renderSteps, isInPiP)
         }
+    }
+    if (showShareDialog) {
+        ShareRecipeDialog(
+            recipe = recipe,
+            onDismiss = { showShareDialog = false }
+        )
     }
     if (showNotificationDialog) {
         NotificationPermissionDialog(

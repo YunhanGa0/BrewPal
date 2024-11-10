@@ -137,7 +137,3 @@ fun RecipeTimesPage(
     }
 }
 
-// 添加跳转到配方详情页的函数
-// fun navigateToRecipeDetail(navController: NavController, recipeId: Int) {
-//     navController.navigate("recipe/$recipeId")
-// }
