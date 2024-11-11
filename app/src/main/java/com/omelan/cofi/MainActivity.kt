@@ -40,12 +40,9 @@ import com.omelan.cofi.share.model.AppDatabase
 import com.omelan.cofi.share.pages.Destinations
 import com.omelan.cofi.ui.CofiTheme
 import com.omelan.cofi.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 val LocalPiPState = staticCompositionLocalOf<Boolean> {
     error("AmbientPiPState value not available.")
@@ -56,6 +53,7 @@ const val appDeepLinkUrl = "https://rozpierog.github.io"
 @ExperimentalMaterial3WindowSizeClassApi
 class MainActivity : MonetCompatActivity() {
     private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private val scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_Cofi)
@@ -148,7 +146,12 @@ class MainActivity : MonetCompatActivity() {
                     composable(Destinations.RECIPE_IMPORT) {
                         ImportRecipePage(
                             viewModel = viewModel(),
-                            onImportComplete = { navController.popBackStack() }
+                            onImportComplete = { 
+                                scope.launch {
+                                    delay(100)
+                                    navController.popBackStack()
+                                }
+                            }
                         )
                     }
                     composable(Destinations.RECIPE_TIMES) {
@@ -219,5 +222,10 @@ class MainActivity : MonetCompatActivity() {
     override fun onPause() {
         super.onPause()
         WearUtils.removeObservers(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 }

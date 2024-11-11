@@ -24,6 +24,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.omelan.cofi.R
 import com.omelan.cofi.components.QRCodeScannerDialog
 import com.omelan.cofi.share.model.RecipeViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -253,7 +254,9 @@ fun ImportRecipePage(
 
         if (showScanner) {
             QRCodeScannerDialog(
-                onDismiss = { showScanner = false },
+                onDismiss = { 
+                    showScanner = false
+                },
                 onPickImage = { imagePicker.launch("image/*") },
                 onResult = { result ->
                     scope.launch {
@@ -268,6 +271,8 @@ fun ImportRecipePage(
                                 )
                             }
                             viewModel.insertSteps(stepsWithRecipeId)
+                            // 添加延迟确保数据库操作完成
+                            delay(100)
                             Toast.makeText(
                                 context,
                                 context.getString(R.string.import_recipe_success),

@@ -63,9 +63,18 @@ fun QRCodeScannerDialog(
         hasCameraPermission = isGranted
     }
 
+    var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+
     LaunchedEffect(Unit) {
         if (!hasCameraPermission) {
             permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            // 确保相机资源被释放
+            cameraProvider?.unbindAll()
         }
     }
 
@@ -92,7 +101,7 @@ fun QRCodeScannerDialog(
                                 }.also { previewView ->
                                     val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                                     cameraProviderFuture.addListener({
-                                        val cameraProvider = cameraProviderFuture.get()
+                                        cameraProvider = cameraProviderFuture.get()
                                         val preview = Preview.Builder()
                                             .build()
                                             .also {
@@ -124,6 +133,9 @@ fun QRCodeScannerDialog(
                                                             .addOnSuccessListener { barcodes ->
                                                                 if (barcodes.isNotEmpty()) {
                                                                     barcodes[0].rawValue?.let { value ->
+                                                                        // 先释放相机资源
+                                                                        cameraProvider?.unbindAll()
+                                                                        // 再回调结果
                                                                         onResult(value)
                                                                         onDismiss()
                                                                     }
@@ -141,13 +153,15 @@ fun QRCodeScannerDialog(
                                             }
 
                                         try {
-                                            cameraProvider.unbindAll()
-                                            cameraProvider.bindToLifecycle(
-                                                lifecycleOwner,
-                                                CameraSelector.DEFAULT_BACK_CAMERA,
-                                                preview,
-                                                imageAnalyzer
-                                            )
+                                            cameraProvider?.let { provider ->
+                                                provider.unbindAll()
+                                                provider.bindToLifecycle(
+                                                    lifecycleOwner,
+                                                    CameraSelector.DEFAULT_BACK_CAMERA,
+                                                    preview,
+                                                    imageAnalyzer
+                                                )
+                                            }
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                         }
