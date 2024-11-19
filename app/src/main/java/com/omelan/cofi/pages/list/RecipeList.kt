@@ -59,6 +59,7 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
             goToSettings = { navController.navigate(route = Destinations.SETTINGS) },
             goToTimes = { navController.navigate(route = Destinations.RECIPE_TIMES) },
             goToImport ={ navController.navigate(route = Destinations.RECIPE_IMPORT) } ,
+            goToCoffeeMap = { navController.navigate(route = Destinations.COFFEE_SHOP_MAP) },
             onNewButtonClick = {
                 // 发送通知
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -88,6 +89,7 @@ fun RecipeList(
     onNewButtonClick: () -> Unit,
     goToTimes: () -> Unit,
     goToImport: () -> Unit,
+    goToCoffeeMap: () -> Unit,
     recipeViewModel: RecipeViewModel = viewModel(),
     stepsViewModel: StepsViewModel = viewModel(),
     context: Context = LocalContext.current
@@ -128,6 +130,12 @@ fun RecipeList(
                     }
                     IconButton(onClick = goToSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = null)
+                    }
+                    IconButton(onClick = goToCoffeeMap) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_map),
+                            contentDescription = "查找咖啡店"
+                        )
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -182,6 +190,7 @@ fun RecipeListPreview() {
         goToSettings = {},
         onNewButtonClick = {},
         goToTimes = {},
-        goToImport = {}
+        goToImport = {},
+        goToCoffeeMap = {}
     )
 }

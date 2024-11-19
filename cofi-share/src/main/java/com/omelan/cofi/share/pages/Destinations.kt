@@ -15,5 +15,6 @@ object Destinations {
     const val SETTINGS_LICENSES = "licenses"
     const val RECIPE_TIMES = "times"
     const val RECIPE_IMPORT = "import"
+    const val COFFEE_SHOP_MAP = "coffee_shop_map"
 }
 

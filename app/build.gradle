@@ -193,6 +193,14 @@ dependencies {
 
     // QR code
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+
+    // Baidu map
+    implementation 'com.baidu.lbsyun:BaiduMapSDK_Search:7.6.3'
+    implementation 'com.baidu.lbsyun:BaiduMapSDK_Map-BWNavi:7.6.3'
+    implementation 'com.baidu.lbsyun:BaiduMapSDK_Location:9.6.4'
+    implementation 'com.baidu.lbsyun:BaiduMapSDK_Util:7.6.3'
+    // 添加 OkHttp 依赖
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 tasks.register("ktlintCheck", JavaExec) {
