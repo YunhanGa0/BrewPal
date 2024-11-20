@@ -108,45 +108,48 @@ fun QRCodeScannerDialog(
                                                 it.setSurfaceProvider(previewView.surfaceProvider)
                                             }
 
-                                        val imageAnalyzer = ImageAnalysis.Builder()
+                                        val imageAnalysis = ImageAnalysis.Builder()
                                             .setTargetResolution(Size(1280, 720))
                                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                            .setImageQueueDepth(1)
                                             .build()
                                             .also {
                                                 it.setAnalyzer(
                                                     ContextCompat.getMainExecutor(context)
                                                 ) { imageProxy ->
-                                                    val mediaImage = imageProxy.image
-                                                    if (mediaImage != null) {
-                                                        val image = InputImage.fromMediaImage(
-                                                            mediaImage,
-                                                            imageProxy.imageInfo.rotationDegrees
-                                                        )
-                                                        
-                                                        val options = BarcodeScannerOptions.Builder()
-                                                            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                                                            .build()
-                                                        
-                                                        val scanner = BarcodeScanning.getClient(options)
-                                                        
-                                                        scanner.process(image)
-                                                            .addOnSuccessListener { barcodes ->
-                                                                if (barcodes.isNotEmpty()) {
-                                                                    barcodes[0].rawValue?.let { value ->
-                                                                        // 先释放相机资源
-                                                                        cameraProvider?.unbindAll()
-                                                                        // 再回调结果
-                                                                        onResult(value)
-                                                                        onDismiss()
+                                                    try {
+                                                        val mediaImage = imageProxy.image
+                                                        if (mediaImage != null) {
+                                                            val image = InputImage.fromMediaImage(
+                                                                mediaImage,
+                                                                imageProxy.imageInfo.rotationDegrees
+                                                            )
+                                                            
+                                                            val options = BarcodeScannerOptions.Builder()
+                                                                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                                                                .build()
+                                                            
+                                                            val scanner = BarcodeScanning.getClient(options)
+                                                            
+                                                            scanner.process(image)
+                                                                .addOnSuccessListener { barcodes ->
+                                                                    for (barcode in barcodes) {
+                                                                        barcode.rawValue?.let { value ->
+                                                                            onResult(value)
+                                                                            onDismiss()
+                                                                        }
                                                                     }
+                                                                    imageProxy.close()
                                                                 }
-                                                                imageProxy.close()
-                                                            }
-                                                            .addOnFailureListener {
-                                                                it.printStackTrace()
-                                                                imageProxy.close()
-                                                            }
-                                                    } else {
+                                                                .addOnFailureListener { e ->
+                                                                    e.printStackTrace()
+                                                                    imageProxy.close()
+                                                                }
+                                                        } else {
+                                                            imageProxy.close()
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        e.printStackTrace()
                                                         imageProxy.close()
                                                     }
                                                 }
@@ -159,7 +162,7 @@ fun QRCodeScannerDialog(
                                                     lifecycleOwner,
                                                     CameraSelector.DEFAULT_BACK_CAMERA,
                                                     preview,
-                                                    imageAnalyzer
+                                                    imageAnalysis
                                                 )
                                             }
                                         } catch (e: Exception) {
