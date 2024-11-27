@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.compose.ui.res.painterResource
 import com.omelan.cofi.components.CoffeeShopRecommendDialog
+import com.omelan.cofi.components.CoffeeAIAssistantDialog
 
 // 在文件顶部定义companion object
 private object RecipeListState {
@@ -112,6 +113,7 @@ fun RecipeList(
         },
     )
     var showRecommendDialog by remember { mutableStateOf(false) }
+    var showAIDialog by remember { mutableStateOf(false) }
     
     // 检查是否是本次启动后的第一次打开
     LaunchedEffect(Unit) {
@@ -128,11 +130,26 @@ fun RecipeList(
         )
     }
 
+    if (showAIDialog) {
+        CoffeeAIAssistantDialog(
+            onDismiss = { showAIDialog = false },
+            apiKey = "kec2fq9yo27KWmTwYuoAurl2"
+        )
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             PiPAwareAppBar(
                 actions = {
+                    IconButton(
+                        onClick = { showAIDialog = true }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_coffee),
+                            contentDescription = "AI Coffee Assistant"
+                        )
+                    }
                     IconButton(onClick = goToImport) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_import),
