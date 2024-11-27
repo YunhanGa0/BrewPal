@@ -12,11 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
@@ -40,9 +36,16 @@ import android.content.Context
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.compose.ui.res.painterResource
+import com.omelan.cofi.components.CoffeeShopRecommendDialog
+
+// 在文件顶部定义companion object
+private object RecipeListState {
+    var isFirstOpenSinceLastLaunch = true
+}
 
 fun NavGraphBuilder.recipeList(navController: NavController) {
     composable(Destinations.RECIPE_LIST) {
@@ -108,6 +111,23 @@ fun RecipeList(
             lazyGridState.animateScrollToItem(0)
         },
     )
+    var showRecommendDialog by remember { mutableStateOf(false) }
+    
+    // 检查是否是本次启动后的第一次打开
+    LaunchedEffect(Unit) {
+        if (RecipeListState.isFirstOpenSinceLastLaunch) {
+            showRecommendDialog = true
+            RecipeListState.isFirstOpenSinceLastLaunch = false
+        }
+    }
+
+    if (showRecommendDialog) {
+        CoffeeShopRecommendDialog(
+            onDismiss = { showRecommendDialog = false },
+            onNavigateToMap = goToCoffeeMap
+        )
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -130,12 +150,6 @@ fun RecipeList(
                     }
                     IconButton(onClick = goToSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = null)
-                    }
-                    IconButton(onClick = goToCoffeeMap) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_map),
-                            contentDescription = "查找咖啡店"
-                        )
                     }
                 },
                 scrollBehavior = scrollBehavior,

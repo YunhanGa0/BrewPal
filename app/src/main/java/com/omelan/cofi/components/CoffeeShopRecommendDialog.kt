@@ -29,13 +29,13 @@ fun CoffeeShopRecommendDialog(
             )
         },
         title = {
-            Log.d("CoffeeShopDialog", "渲染标题")
-            Text("探索咖啡店")
+            Log.d("CoffeeShopDialog", "Rendering title")
+            Text("Explore Coffee Shops")
         },
         text = {
             Log.d("CoffeeShopDialog", "渲染内容")
             Text(
-                "喝惯了自己冲的咖啡了？这里有一些只为你推荐的咖啡店，或许能找到你的下一个心头好。",
+                "Tired of brewing your own coffee? Here are some recommended coffee shops that might become your next favorite spot.",
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -48,13 +48,13 @@ fun CoffeeShopRecommendDialog(
                     onDismiss()
                 }
             ) {
-                Text("去看看")
+                Text("Let's Go")
             }
         },
         dismissButton = {
             Log.d("CoffeeShopDialog", "渲染取消按钮")
             TextButton(onClick = onDismiss) {
-                Text("稍后再说")
+                Text("Maybe Later")
             }
         }
     )
