@@ -134,6 +134,8 @@ class WenXinAPI {
 
             val jsonResponse = JSONObject(responseBody ?: "")
             val result = jsonResponse.getString("result")
+            
+            Log.d("CoffeeAI", "AI response markdown content: $result")
 
             val assistantMessage = JSONObject().apply {
                 put("role", "assistant")
