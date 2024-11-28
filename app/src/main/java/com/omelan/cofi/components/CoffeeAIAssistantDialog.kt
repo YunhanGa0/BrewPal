@@ -181,7 +181,7 @@ fun CoffeeAIAssistantDialog(
                     value = inputText,
                     onValueChange = { inputText = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Enter your question about coffee brewing...") },
+                    placeholder = { Text("Ask your BrewPal:") },
                     enabled = !isLoading
                 )
             }

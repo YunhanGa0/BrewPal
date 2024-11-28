@@ -146,7 +146,7 @@ fun RecipeList(
                         onClick = { showAIDialog = true }
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_coffee),
+                            painter = painterResource(id = R.drawable.ic_chat),
                             contentDescription = "AI Coffee Assistant"
                         )
                     }

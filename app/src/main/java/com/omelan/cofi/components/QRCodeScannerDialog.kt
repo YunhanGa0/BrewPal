@@ -88,6 +88,7 @@ fun QRCodeScannerDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
+                            .padding(top = 60.dp)
                     ) {
                         AndroidView(
                             factory = { context ->
@@ -193,12 +194,14 @@ fun QRCodeScannerDialog(
                 
                 OutlinedButton(
                     onClick = onPickImage,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 65.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_image),
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
+                        //modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(stringResource(R.string.import_recipe_pick_image))
                 }
