@@ -64,7 +64,7 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
             goToTimes = { navController.navigate(route = Destinations.RECIPE_TIMES) },
             goToImport ={ navController.navigate(route = Destinations.RECIPE_IMPORT) } ,
             goToCoffeeMap = { navController.navigate(route = Destinations.COFFEE_SHOP_MAP) },
-            onNewButtonClick = {
+            /*onNewButtonClick = {
                 // 发送通知
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val channelId = "test_channel"
@@ -80,6 +80,8 @@ fun NavGraphBuilder.recipeList(navController: NavController) {
                     .setAutoCancel(true)
                 notificationManager.notify(1, builder.build())
             }
+
+             */
         )
     }
 }
@@ -90,7 +92,7 @@ fun RecipeList(
     navigateToRecipe: (recipeId: Int) -> Unit,
     addNewRecipe: () -> Unit,
     goToSettings: () -> Unit,
-    onNewButtonClick: () -> Unit,
+    //onNewButtonClick: () -> Unit,
     goToTimes: () -> Unit,
     goToImport: () -> Unit,
     goToCoffeeMap: () -> Unit,
@@ -156,9 +158,11 @@ fun RecipeList(
                             contentDescription = null
                         )
                     }
-                    IconButton(onClick = onNewButtonClick) {
+                    /* IconButton(onClick = onNewButtonClick) {
                         Icon(Icons.Rounded.Add, contentDescription = "Add new item")
                     }
+
+                     */
                     IconButton(onClick = goToTimes) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_history),
@@ -219,7 +223,7 @@ fun RecipeListPreview() {
         navigateToRecipe = {},
         addNewRecipe = {},
         goToSettings = {},
-        onNewButtonClick = {},
+        //onNewButtonClick = {},
         goToTimes = {},
         goToImport = {},
         goToCoffeeMap = {}
