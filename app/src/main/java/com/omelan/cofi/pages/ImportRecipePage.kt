@@ -48,7 +48,7 @@ fun ImportRecipePage(
                 // 添加加载状态提示
                 Toast.makeText(
                     context,
-                    "正在处理图片...",
+                    "The picture is being processed...",
                     Toast.LENGTH_SHORT
                 ).show()
                 

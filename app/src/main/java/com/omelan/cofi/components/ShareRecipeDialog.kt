@@ -24,6 +24,8 @@ import android.os.Environment
 import android.widget.Toast
 import java.io.File
 import java.io.FileOutputStream
+import android.content.ContentValues
+import android.provider.MediaStore
 
 @Composable
 fun ShareRecipeDialog(
@@ -120,14 +122,23 @@ fun QRCodeDialog(
             ) {
                 TextButton(onClick = {
                     // 保存二维码图片到相册
-                    val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    val imageFile = File(imagesDir, "cofi_qr_${System.currentTimeMillis()}.png")
+                    val fileName = "cofi_qr_${System.currentTimeMillis()}.png"
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                    }
+                    
                     try {
-                        FileOutputStream(imageFile).use { out ->
-                            qrCodeBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                        context.contentResolver.insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            contentValues
+                        )?.let { uri ->
+                            context.contentResolver.openOutputStream(uri)?.use { out ->
+                                qrCodeBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            }
+                            Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
                         }
-                        MediaScannerConnection.scanFile(context, arrayOf(imageFile.toString()), null, null)
-                        Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Toast.makeText(context, R.string.qr_code_save_failed, Toast.LENGTH_SHORT).show()
