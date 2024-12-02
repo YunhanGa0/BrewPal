@@ -4,6 +4,9 @@
 
 package com.omelan.cofi.pages.settings
 
+import android.content.Context
+import android.media.MediaPlayer
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
@@ -36,6 +39,8 @@ import com.omelan.cofi.ui.CofiTheme
 import com.omelan.cofi.utils.checkPiPPermission
 import com.omelan.cofi.utils.getDefaultPadding
 import kotlinx.coroutines.launch
+import com.omelan.cofi.share.timer.TimerSound
+import com.omelan.cofi.share.timer.notification.TIMER_SOUND_DEFAULT_VALUE
 
 @Composable
 fun TimerSettings(goBack: () -> Unit) {
@@ -74,6 +79,10 @@ fun TimerSettings(goBack: () -> Unit) {
     val toggleStepChangeVibration: () -> Unit = {
         coroutineScope.launch { dataStore.toggleStepChangeVibration() }
     }
+
+    val selectedSound by dataStore.getTimerSoundSetting()
+        .collectAsState(TIMER_SOUND_DEFAULT_VALUE)
+    var showSoundDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -256,6 +265,47 @@ fun TimerSettings(goBack: () -> Unit) {
                     )
                 }
             }
+            item {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_timer_sound))
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(
+                                id = try {
+                                    TimerSound.valueOf(selectedSound).nameResId
+                                } catch (e: IllegalArgumentException) {
+                                    // 如果存储的值无效，使用默认值
+                                    TimerSound.DING.nameResId
+                                }
+                            )
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            painterResource(id = R.drawable.ic_music),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.settingsItemModifier(
+                        onClick = { showSoundDialog = true }
+                    ),
+                )
+                
+                if (showSoundDialog) {
+                    TimerSoundDialog(
+                        dismiss = { showSoundDialog = false },
+                        selectSound = { sound ->
+                            coroutineScope.launch {
+                                dataStore.setTimerSound(sound.name)
+                                showSoundDialog = false
+                            }
+                        },
+                        currentSound = selectedSound
+                    )
+                }
+            }
         }
     }
 }
@@ -290,6 +340,55 @@ fun CombineWeightDialog(
                         ),
                     )
                 },
+            )
+        }
+    }
+}
+
+@Composable
+fun TimerSoundDialog(
+    dismiss: () -> Unit,
+    selectSound: (TimerSound) -> Unit,
+    currentSound: String
+) {
+    val context = LocalContext.current
+    var previewPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    
+    DisposableEffect(Unit) {
+        onDispose {
+            previewPlayer?.release()
+        }
+    }
+    
+    Material3Dialog(
+        onDismissRequest = dismiss,
+        title = {
+            Text(text = stringResource(id = R.string.settings_timer_sound))
+        },
+    ) {
+        TimerSound.entries.forEach { sound ->
+            ListItem(
+                headlineContent = { 
+                    Text(stringResource(id = sound.nameResId)) 
+                },
+                modifier = Modifier
+                    .selectable(
+                        selected = currentSound == sound.name,
+                        onClick = { 
+                            // 播放预览
+                            previewPlayer?.release()
+                            previewPlayer = MediaPlayer.create(context, sound.rawResId).apply {
+                                start()
+                            }
+                            selectSound(sound)
+                        }
+                    ),
+                leadingContent = {
+                    RadioButton(
+                        selected = currentSound == sound.name,
+                        onClick = { selectSound(sound) }
+                    )
+                }
             )
         }
     }

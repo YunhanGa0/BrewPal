@@ -181,4 +181,9 @@
     <string name="import_recipe_pick_image">Pick image</string>
     <string name="qr_code_scan_failed">QR code scan failed</string>
     <string name="qr_code_not_found">QR code not found</string>
+    <string name="settings_timer_sound">Timer sound</string>
+    <string name="sound_ding">Ding</string>
+    <string name="sound_bell">Bell</string>
+    <string name="sound_beep">Beep</string>
+    <string name="sound_carriage">Carriage</string>
 </resources>

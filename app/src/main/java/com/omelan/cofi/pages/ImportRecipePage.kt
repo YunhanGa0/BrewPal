@@ -137,6 +137,47 @@ fun ImportRecipePage(
         }
     }
 
+    // 添加导入状态控制
+    var isImporting by remember { mutableStateOf(false) }
+
+    // 修改扫码结果处理
+    val handleImportResult = { result: String ->
+        if (!isImporting) {
+            isImporting = true
+            scope.launch {
+                try {
+                    val (recipe, steps) = shareUtils.decodeRecipe(result)
+                    val recipeId = viewModel.insertRecipe(recipe.copy(id = 0, times = 0))
+                    val stepsWithRecipeId = steps.map { step ->
+                        step.copy(
+                            recipeId = recipeId.toInt(),
+                            id = 0,
+                            orderInRecipe = steps.indexOf(step)
+                        )
+                    }
+                    viewModel.insertSteps(stepsWithRecipeId)
+                    delay(200)  // 确保数据库操作完成
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.import_recipe_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    showScanner = false
+                    onImportComplete()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.import_recipe_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } finally {
+                    isImporting = false
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -258,38 +299,7 @@ fun ImportRecipePage(
                     showScanner = false
                 },
                 onPickImage = { imagePicker.launch("image/*") },
-                onResult = { result ->
-                    scope.launch {
-                        try {
-                            val (recipe, steps) = shareUtils.decodeRecipe(result)
-                            val recipeId = viewModel.insertRecipe(recipe.copy(id = 0, times = 0))
-                            val stepsWithRecipeId = steps.map { step ->
-                                step.copy(
-                                    recipeId = recipeId.toInt(),
-                                    id = 0,
-                                    orderInRecipe = steps.indexOf(step)
-                                )
-                            }
-                            viewModel.insertSteps(stepsWithRecipeId)
-                            // 添加延迟确保数据库操作完成
-                            delay(100)
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.import_recipe_success),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            showScanner = false
-                            onImportComplete()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.import_recipe_error),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
+                onResult = handleImportResult
             )
         }
     }

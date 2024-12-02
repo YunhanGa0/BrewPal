@@ -3,7 +3,10 @@ package com.omelan.cofi.share
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.omelan.cofi.share.timer.notification.TIMER_SOUND_DEFAULT_VALUE
+import com.omelan.cofi.share.timer.notification.TIMER_SOUND_KEY
 import kotlinx.coroutines.flow.map
 
 open class DataStore(private val context: Context) {
@@ -72,6 +75,16 @@ open class DataStore(private val context: Context) {
     suspend fun selectCombineMethod(combineMethod: CombineWeight) {
         context.dataStore.edit {
             it[COMBINE_WEIGHT] = combineMethod.name
+        }
+    }
+
+    fun getTimerSoundSetting() = context.dataStore.data.map { preferences ->
+        preferences[TIMER_SOUND_KEY] ?: TIMER_SOUND_DEFAULT_VALUE
+    }
+
+    suspend fun setTimerSound(sound: String) {
+        context.dataStore.edit { preferences ->
+            preferences[TIMER_SOUND_KEY] = sound
         }
     }
 }

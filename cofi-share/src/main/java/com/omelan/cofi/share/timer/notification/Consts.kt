@@ -1,5 +1,7 @@
 package com.omelan.cofi.share.timer.notification
 
+import androidx.datastore.preferences.core.stringPreferencesKey
+
 const val COFI_TIMER_NOTIFICATION_ID = 2137
 const val COFI_TIMER_NOTIFICATION_TAG = "cofi_notification_timer"
 const val COFI_TIMER_NOTIFICATION_RECIPE_ID = "cofi_timer_notification_recipe_id"
@@ -14,3 +16,7 @@ const val WORKER_PROGRESS_PROGRESS = "cofi_worker_progress_progress"
 const val WORKER_PROGRESS_IS_PAUSED = "cofi_worker_progress_is_paused"
 const val WORKER_PROGRESS_WEIGHT_MULTIPLIER = "cofi_worker_progress_weight_multiplier"
 const val WORKER_PROGRESS_TIME_MULTIPLIER = "cofi_worker_progress_time_multiplier"
+const val TIMER_SOUND_DEFAULT_VALUE = "DING"
+
+// 添加 timer sound key
+val TIMER_SOUND_KEY = stringPreferencesKey("timer_sound")

@@ -105,7 +105,7 @@ object Timer {
         val lifecycleOwner = LocalLifecycleOwner.current
         val isDarkMode = isSystemInDarkTheme()
         val haptics = remember { Haptics(context) }
-        val mediaPlayer = remember { MediaPlayer.create(context, R.raw.ding) }
+        var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
         val isStepChangeSoundEnabled by dataStore.getStepChangeSoundSetting()
             .collectAsState(initial = STEP_SOUND_DEFAULT_VALUE)
         val isStepChangeVibrationEnabled by dataStore.getStepChangeVibrationSetting()
@@ -143,6 +143,15 @@ object Timer {
             animatedProgressValue.stop()
         }
 
+        val selectedSound by dataStore.getTimerSoundSetting()
+            .collectAsState(TIMER_SOUND_DEFAULT_VALUE)
+
+        LaunchedEffect(selectedSound) {
+            mediaPlayer?.release()
+            val soundResId = TimerSound.valueOf(selectedSound).rawResId
+            mediaPlayer = MediaPlayer.create(context, soundResId)
+        }
+
         val changeToNextStep = suspendCompat { silent: Boolean ->
             animatedProgressValue.snapTo(0f)
             if (indexOfCurrentStep != indexOfLastStep) {
@@ -156,7 +165,19 @@ object Timer {
                 return@suspendCompat
             }
             if (isStepChangeSoundEnabled) {
-                mediaPlayer.start()
+                try {
+                    if (mediaPlayer?.isPlaying == true) {
+                        mediaPlayer?.stop()
+                        mediaPlayer?.prepare()
+                    }
+                    mediaPlayer?.start()
+                } catch (e: Exception) {
+                    val soundResId = TimerSound.valueOf(selectedSound).rawResId
+                    mediaPlayer?.release()
+                    mediaPlayer = MediaPlayer.create(context, soundResId)?.apply {
+                        start()
+                    }
+                }
             }
             if (isStepChangeVibrationEnabled) {
                 haptics.progress()

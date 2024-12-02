@@ -78,6 +78,21 @@ fun QRCodeScannerDialog(
         }
     }
 
+    // 添加状态控制
+    var isScanning by remember { mutableStateOf(true) }
+
+    // 修改扫码成功的处理逻辑
+    val handleScanResult = { value: String ->
+        if (isScanning) {
+            isScanning = false  // 防止重复处理
+            // 先解绑相机
+            cameraProvider?.unbindAll()
+            // 延迟处理结果，确保相机资源释放
+            onResult(value)
+            onDismiss()
+        }
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.import_recipe_scan)) },
@@ -120,7 +135,7 @@ fun QRCodeScannerDialog(
                                                 ) { imageProxy ->
                                                     try {
                                                         val mediaImage = imageProxy.image
-                                                        if (mediaImage != null) {
+                                                        if (mediaImage != null && isScanning) {  // 添加扫描状态检查
                                                             val image = InputImage.fromMediaImage(
                                                                 mediaImage,
                                                                 imageProxy.imageInfo.rotationDegrees
@@ -136,8 +151,7 @@ fun QRCodeScannerDialog(
                                                                 .addOnSuccessListener { barcodes ->
                                                                     for (barcode in barcodes) {
                                                                         barcode.rawValue?.let { value ->
-                                                                            onResult(value)
-                                                                            onDismiss()
+                                                                            handleScanResult(value)
                                                                         }
                                                                     }
                                                                     imageProxy.close()
