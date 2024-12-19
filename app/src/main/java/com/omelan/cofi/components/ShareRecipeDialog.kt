@@ -219,8 +219,7 @@ fun ShareCardDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(16.dp)
                         ) {
                             // 配方图标和名称
                             Row(
@@ -236,8 +235,7 @@ fun ShareCardDialog(
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text(
                                     text = recipe.name,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    style = MaterialTheme.typography.headlineMedium
                                 )
                             }
                             
@@ -245,51 +243,62 @@ fun ShareCardDialog(
                                 Text(
                                     text = recipe.description,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
                             
                             Divider(modifier = Modifier.padding(vertical = 16.dp))
                             
                             // 步骤列表
-                            Column(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                steps.forEachIndexed { index, step ->
-                                    Row(
-                                        modifier = Modifier.padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                            steps.forEachIndexed { index, step ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier.size(24.dp)
                                     ) {
-                                        Surface(
-                                            shape = CircleShape,
-                                            color = MaterialTheme.colorScheme.primaryContainer,
-                                            modifier = Modifier.size(24.dp)
-                                        ) {
+                                        Text(
+                                            text = "${index + 1}",
+                                            modifier = Modifier.padding(4.dp),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = step.name,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                        step.time?.let { time ->
                                             Text(
-                                                text = "${index + 1}",
-                                                modifier = Modifier.padding(4.dp),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                textAlign = TextAlign.Center
+                                                text = "${time}ms",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.secondary
                                             )
-                                        }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text(
-                                                text = step.name,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                            step.time?.let { time ->
-                                                Text(
-                                                    text = "${time}ms",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                            }
                                         }
                                     }
                                 }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // 二维码居中显示
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    bitmap = qrCodeBitmap.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(200.dp)
+                                )
                             }
                         }
                     }
