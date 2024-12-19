@@ -11,16 +11,28 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.unit.dp
 import com.baidu.location.BDAbstractLocationListener
 import com.baidu.location.BDLocation
 import com.baidu.location.LocationClient
@@ -30,11 +42,15 @@ import com.baidu.mapapi.model.LatLng
 import com.baidu.mapapi.search.core.SearchResult
 import com.baidu.mapapi.search.poi.*
 import com.omelan.cofi.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.baidu.mapapi.search.core.PoiInfo
+import com.omelan.cofi.share.model.RecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeeShopMapPage(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    recipeViewModel: RecipeViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -50,6 +66,10 @@ fun CoffeeShopMapPage(
     var markerIcon by remember { mutableStateOf<BitmapDescriptor?>(null) }
     var lastSearchTime = 0L
     var currentShownMarker by remember { mutableStateOf<Marker?>(null) }
+    var recommendedShops by remember { mutableStateOf<List<PoiInfo>>(emptyList()) }
+    val recipes by recipeViewModel.getAllRecipes().observeAsState(initial = emptyList())
+    val mostUsedRecipe = recipes.maxByOrNull { it.times }
+    val leastUsedRecipe = recipes.filter { it.times > 0 }.minByOrNull { it.times }
 
     val searchNearbyShops = { location: LatLng ->
         val currentTime = System.currentTimeMillis()
@@ -72,13 +92,13 @@ fun CoffeeShopMapPage(
                 setOnGetPoiSearchResultListener(object : OnGetPoiSearchResultListener {
                     override fun onGetPoiResult(result: PoiResult?) {
                         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-                            Log.e("CoffeeShopMap", "POI搜索失败: ${result?.error}")
                             return
                         }
                         
-                        Log.d("CoffeeShopMap", "搜索成功，找到 ${result.allPoi.size} 个结果")
-                        result.allPoi.forEach { poi ->
-                            Log.d("CoffeeShopMap", "咖啡店: ${poi.name}, 地址: ${poi.address}")
+                        val allShops = result.allPoi
+                        if (allShops.size >= 2) {
+                            val randomShops = allShops.shuffled().take(2)
+                            recommendedShops = randomShops
                         }
 
                         mapView?.map?.let { baiduMap ->
@@ -217,79 +237,169 @@ fun CoffeeShopMapPage(
             )
         }
     ) { paddingValues ->
-        AndroidView(
-            factory = { ctx ->
-                MapView(ctx).also { mv ->
-                    Log.d("CoffeeShopMap", "地图视图创建")
-                    mapView = mv
-                    val baiduMap = mv.map
-                    
-                    baiduMap.isMyLocationEnabled = true
-                    Log.d("CoffeeShopMap", "地图定位图层已启用")
-                    
-                    baiduMap.setInfoWindowAdapter(object : InfoWindowAdapter {
-                        override fun getInfoWindowView(marker: Marker): View {
-                            val title = marker.extraInfo?.getString("title") ?: "未知咖啡店"
-                            val address = marker.extraInfo?.getString("address") ?: ""
-                            Log.d("CoffeeShopMap", "创建信息窗口: title=$title, address=$address")
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // 地图视图，占据固定高度
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.6f)  // 占据60%的高度
+            ) {
+                AndroidView(
+                    factory = { ctx ->
+                        MapView(ctx).also { mv ->
+                            Log.d("CoffeeShopMap", "图视图创建")
+                            mapView = mv
+                            val baiduMap = mv.map
                             
-                            return TextView(context).apply {
-                                text = android.text.Html.fromHtml(
-                                    "<b>$title</b><br/>$address",
-                                    android.text.Html.FROM_HTML_MODE_COMPACT
-                                )
-                                setTextColor(android.graphics.Color.BLACK)
-                                setPadding(20, 10, 20, 10)
-                                layoutParams = ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT
-                                )
-                                minWidth = 300
-                                maxWidth = 600
-                                gravity = android.view.Gravity.CENTER
-                                elevation = 8f
-                                setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f)
-                                background = android.graphics.drawable.GradientDrawable().apply {
-                                    setColor(android.graphics.Color.WHITE)
-                                    cornerRadius = 8f
+                            baiduMap.isMyLocationEnabled = true
+                            Log.d("CoffeeShopMap", "地图定位图层已启用")
+                            
+                            baiduMap.setInfoWindowAdapter(object : InfoWindowAdapter {
+                                override fun getInfoWindowView(marker: Marker): View {
+                                    val title = marker.extraInfo?.getString("title") ?: "未知咖啡店"
+                                    val address = marker.extraInfo?.getString("address") ?: ""
+                                    Log.d("CoffeeShopMap", "创建信息窗口: title=$title, address=$address")
+                                    
+                                    return TextView(context).apply {
+                                        text = android.text.Html.fromHtml(
+                                            "<b>$title</b><br/>$address",
+                                            android.text.Html.FROM_HTML_MODE_COMPACT
+                                        )
+                                        setTextColor(android.graphics.Color.BLACK)
+                                        setPadding(20, 10, 20, 10)
+                                        layoutParams = ViewGroup.LayoutParams(
+                                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                        )
+                                        minWidth = 300
+                                        maxWidth = 600
+                                        gravity = android.view.Gravity.CENTER
+                                        elevation = 8f
+                                        setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f)
+                                        background = android.graphics.drawable.GradientDrawable().apply {
+                                            setColor(android.graphics.Color.WHITE)
+                                            cornerRadius = 8f
+                                        }
+                                    }
                                 }
+                                
+                                override fun getInfoWindowViewYOffset(): Int {
+                                    return -80
+                                }
+
+                                override fun getInfoWindow(marker: Marker?): InfoWindow? {
+                                    return null
+                                }
+                            })
+                            
+                            baiduMap.setOnMarkerClickListener { marker ->
+                                if (currentShownMarker == marker) {
+                                    marker.hideInfoWindow()
+                                    currentShownMarker = null
+                                } else {
+                                    currentShownMarker?.hideInfoWindow()
+                                    marker.showInfoWindow()
+                                    currentShownMarker = marker
+                                }
+                                true
+                            }
+                            
+                            val myLocationConfiguration = MyLocationConfiguration(
+                                MyLocationConfiguration.LocationMode.NORMAL,
+                                true,
+                                null,
+                                0xAAFFFF88.toInt(),
+                                0xAA00FF00.toInt()
+                            )
+                            baiduMap.setMyLocationConfiguration(myLocationConfiguration)
+                            Log.d("CoffeeShopMap", "地图定位配置已设置")
+                        }
+                    }
+                )
+            }
+            
+            // 推荐区域（可滚动）
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)  // 占据剩余空间
+                    .verticalScroll(rememberScrollState())  // 只让推荐区域可滚动
+            ) {
+                // 最常用配方推荐
+                if (mostUsedRecipe != null && recommendedShops.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "I've notice your favourite is「${mostUsedRecipe.name}」",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "This coffee shop has a similar flavor！",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            recommendedShops.getOrNull(0)?.let { shop ->
+                                Text(
+                                    text = shop.name,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    text = shop.address ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
-                        
-                        override fun getInfoWindowViewYOffset(): Int {
-                            return -80
-                        }
-
-                        override fun getInfoWindow(marker: Marker?): InfoWindow? {
-                            return null
-                        }
-                    })
-                    
-                    baiduMap.setOnMarkerClickListener { marker ->
-                        if (currentShownMarker == marker) {
-                            marker.hideInfoWindow()
-                            currentShownMarker = null
-                        } else {
-                            currentShownMarker?.hideInfoWindow()
-                            marker.showInfoWindow()
-                            currentShownMarker = marker
-                        }
-                        true
                     }
-                    
-                    val myLocationConfiguration = MyLocationConfiguration(
-                        MyLocationConfiguration.LocationMode.NORMAL,
-                        true,
-                        null,
-                        0xAAFFFF88.toInt(),
-                        0xAA00FF00.toInt()
-                    )
-                    baiduMap.setMyLocationConfiguration(myLocationConfiguration)
-                    Log.d("CoffeeShopMap", "地图定位配置已设置")
                 }
-            },
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
-        )
+
+                // 最少使用配方推荐
+                if (leastUsedRecipe != null && recommendedShops.size > 1) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "You rarely drink「${leastUsedRecipe.name}」",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Maybe it's a good choice to try it too！",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            recommendedShops.getOrNull(1)?.let { shop ->
+                                Text(
+                                    text = shop.name,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    text = shop.address ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 } 
 
