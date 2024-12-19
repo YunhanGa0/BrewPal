@@ -133,6 +133,71 @@ fun RecipeTimesPage(
                     }
                 }
             }
+
+            // 在最后添加 AI 总结
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "AI Analysis",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        val summary = generateAISummary(sortedRecipes)
+                        Text(
+                            text = summary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun generateAISummary(recipes: List<Recipe>): String {
+    if (recipes.isEmpty()) {
+        return "Start brewing your first coffee to see your preferences analysis!"
+    }
+
+    val totalBrews = recipes.sumOf { it.times }
+    val mostUsed = recipes.maxByOrNull { it.times }
+    val recentlyUsed = recipes.filter { it.times > 0 }
+    
+    return buildString {
+        append("Based on your brewing history of $totalBrews total brews, ")
+        
+        if (mostUsed != null && mostUsed.times > 0) {
+            append("your go-to recipe is ${mostUsed.name} (${mostUsed.times} times). ")
+        }
+        
+        if (recentlyUsed.size > 1) {
+            append("You've explored ${recentlyUsed.size} different brewing methods, ")
+            append("showing your interest in diverse coffee experiences. ")
+        }
+        
+        // 添加使用频率分析
+        val frequentRecipes = recipes.filter { it.times >= totalBrews * 0.2 }  // 使用次数占总次数20%以上
+        if (frequentRecipes.isNotEmpty()) {
+            append("You frequently use ${frequentRecipes.joinToString(", ") { it.name }}, ")
+            append("which represents your core brewing preferences. ")
+        }
+        
+        // 添加建议
+        append("Consider ")
+        if (recipes.any { it.times == 0 }) {
+            append("trying out your unused recipes to expand your coffee journey!")
+        } else {
+            append("exploring new recipes to add to your collection!")
         }
     }
 }
